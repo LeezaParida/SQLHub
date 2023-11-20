@@ -1,0 +1,56 @@
+Here are the queries to check data quality.
+
+QUERY FOR FINDING DUPLICATES FOR FILM TABLE:
+SELECT film_id,title,description,release_year,language_id,rental_duration,
+rental_rate,length,replacement_cost,rating,last_update,special_features,fulltext,
+COUNT(*)
+FROM film
+GROUP BY film_id,title,description,release_year,language_id,rental_duration,
+rental_rate,length,replacement_cost,rating,last_update,special_features,fulltext
+HAVING COUNT(*)>1;
+
+QUERY FOR FINDING DUPLICATES FOR CUSTOMER TABLE:
+SELECT customer_id,store_id,first_name,last_name,email,
+address_id,activebool,create_date,last_update,active,
+COUNT(*) 
+FROM customer
+GROUP BY customer_id,store_id,first_name,last_name,email,
+address_id,activebool,create_date,last_update,active
+HAVING COUNT(*)>1
+
+QUERY FOR FINDING NON-UNIFORM DATA FOR FILM TABLE:
+
+Non-uniform data could manifest as inconsistencies in formatting, such as capitalization differences in text fields. 
+
+SELECT distinct title from film 
+SELECT distinct description from film 
+SELECT distinct release_year from film 
+SELECT distinct language_id from film 
+SELECT distinct rental_rate from film 
+SELECT distinct rental_duration from film 
+SELECT distinct length from film 
+SELECT distinct replacement_cost from film 
+SELECT distinct rating from film 
+SELECT distinct last_update from film 
+SELECT distinct special_features from film 
+SELECT distinct fulltext from film
+
+QUERY FOR FINDING NON-UNIFORM DATA FOR CUSTOMER TABLE:
+SELECT distinct store_id FROM customer
+SELECT distinct first_name FROM customer
+SELECT distinct last_name FROM customer
+SELECT distinct email FROM customer
+SELECT distinct address_id FROM customer
+SELECT distinct activebool FROM customer
+SELECT distinct create_date FROM customer
+SELECT distinct last_update FROM customer
+SELECT distinct active FROM customer
+
+
+QUERY FOR FINDING MISSING DATA FOR FILM TABLE:
+SELECT film_id
+FROM film
+WHERE title IS NULL OR description IS NULL OR release_year IS NULL OR rating IS NULL
+OR rental_duration IS NULL OR rental_rate IS NULL OR replacement_cost IS NULL
+OR last_update IS NULL;
+
