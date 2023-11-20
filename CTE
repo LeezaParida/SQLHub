@@ -1,0 +1,36 @@
+Here is the SQL query with CTE(Common Table Expression) where the query logic is encapsulated within a CTE named "total_amount_paid." The final SELECT statement calculates the average of the total amounts from the CTE.
+
+WITH total_amount_paid (customer_id, first_name, last_name, country, city, total_amount) AS
+(SELECT E.customer_id, A.first_name, A.last_name, D.country, C.city,
+           SUM(E.amount) AS total_amount
+    FROM payment E
+    INNER JOIN customer A ON E.customer_id = A.customer_id
+    INNER JOIN address B ON A.address_id = B.address_id
+    INNER JOIN city C ON B.city_id = C.city_id
+    INNER JOIN country D ON C.country_id = D.country_id
+    WHERE C.city IN (
+        SELECT C.city
+        FROM CUSTOMER A
+        INNER JOIN address B ON A.address_id = B.address_id
+        INNER JOIN city C ON B.city_id = C.city_id
+        INNER JOIN country D ON C.country_id = D.country_id
+        WHERE C.country_id IN (
+            SELECT D.country_id
+            FROM CUSTOMER A
+            INNER JOIN address B ON A.address_id = B.address_id
+            INNER JOIN city C ON B.city_id = C.city_id
+            INNER JOIN country D ON C.country_id = D.country_id
+            GROUP BY D.country_id
+            ORDER BY COUNT(A.customer_id) DESC
+            LIMIT 10
+        )
+        GROUP BY C.city
+        ORDER BY COUNT(A.customer_id) DESC
+        LIMIT 10
+    )
+    GROUP BY E.customer_id, A.first_name, A.last_name, D.country, C.city
+    ORDER BY total_amount DESC
+    LIMIT 5)
+
+SELECT AVG(total_amount) AS average
+FROM total_amount_paid;
