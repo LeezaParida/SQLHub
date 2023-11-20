@@ -1,0 +1,72 @@
+Query to find the top 10 countries for Rockbuster in terms of customer numbers
+
+SELECT D.country,
+	   COUNT(A.customer_id) AS cust_count
+FROM CUSTOMER A
+INNER JOIN address B ON A.address_id = B.address_id
+INNER JOIN city C ON B.city_id = C.city_id
+INNER JOIN country D ON C.country_id = D.country_id
+GROUP BY D.country
+ORDER BY cust_count DESC
+LIMIT 10;
+
+
+A query to identify the top 10 cities that fall within any of the top 10 countries I identified.
+
+SELECT D.country,
+	   C.city,
+	   COUNT(A.customer_id) AS cust_count
+FROM CUSTOMER A
+INNER JOIN address B ON A.address_id = B.address_id
+INNER JOIN city C ON B.city_id = C.city_id
+INNER JOIN country D ON C.country_id = D.country_id
+WHERE C.country_id IN
+(
+SELECT D.country_id
+FROM CUSTOMER A
+INNER JOIN address B ON A.address_id = B.address_id
+INNER JOIN city C ON B.city_id = C.city_id
+INNER JOIN country D ON C.country_id = D.country_id
+GROUP BY D.country_id
+ORDER BY COUNT(A.customer_id) DESC
+LIMIT 10
+)
+GROUP BY D.country, C.city
+ORDER BY cust_count DESC
+LIMIT 10;
+
+
+A query to find the top 5 customers in any of the top 10 cities who’ve paid the highest total amounts to Rockbuster.
+
+SELECT E.customer_id,A.first_name,A.last_name,
+D.country,C.city,sum(E.amount) AS total_amount
+FROM payment E
+INNER JOIN customer A on E.customer_id = A.customer_id
+INNER JOIN address B ON A.address_id = B.address_id
+INNER JOIN city C ON B.city_id = C.city_id
+INNER JOIN country D ON C.country_id = D.country_id
+WHERE C.city IN
+(
+SELECT C.city
+FROM CUSTOMER A
+INNER JOIN address B ON A.address_id = B.address_id
+INNER JOIN city C ON B.city_id = C.city_id
+INNER JOIN country D ON C.country_id = D.country_id
+WHERE C.country_id IN
+(
+SELECT D.country_id
+FROM CUSTOMER A
+INNER JOIN address B ON A.address_id = B.address_id
+INNER JOIN city C ON B.city_id = C.city_id
+INNER JOIN country D ON C.country_id = D.country_id
+GROUP BY D.country_id
+ORDER BY COUNT(A.customer_id) DESC
+LIMIT 10
+)
+GROUP BY C.city
+ORDER BY COUNT(A.customer_id) DESC
+LIMIT 10)
+GROUP BY E.customer_id,A.first_name,A.last_name,
+D.country,C.city
+ORDER BY total_amount DESC
+LIMIT 5;
